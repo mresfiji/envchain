@@ -79,3 +79,10 @@ def test_audit_entry_roundtrip() -> None:
     assert restored.context == entry.context
     assert restored.details == entry.details
     assert restored.timestamp == entry.timestamp
+
+
+def test_entries_for_profile_returns_empty_for_unknown(audit_log: AuditLog) -> None:
+    """entries_for_profile should return an empty list when no entries match."""
+    audit_log.record("read", "base", "local")
+    result = audit_log.entries_for_profile("nonexistent-profile")
+    assert result == []
