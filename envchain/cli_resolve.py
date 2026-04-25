@@ -36,7 +36,13 @@ def cli():
     envvar="ENVCHAIN_STORE",
     help="Path to the profile store file.",
 )
-def resolve_command(profiles, context, fmt, store):
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    default=False,
+    help="Preview resolved variable keys without outputting their values.",
+)
+def resolve_command(profiles, context, fmt, store, dry_run):
     """Resolve and export chained environment variable profiles.
 
     PROFILES is one or more profile names to chain in order.
@@ -50,6 +56,10 @@ def resolve_command(profiles, context, fmt, store):
         profile_store = ProfileStore(store)
         resolver = ProfileResolver(profile_store)
         variables = resolver.resolve(list(profiles), context=context)
+        if dry_run:
+            for key in sorted(variables):
+                click.echo(key)
+            return
         output = export_variables(variables, fmt=fmt)
         if output:
             click.echo(output)
