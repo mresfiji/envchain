@@ -16,6 +16,12 @@ def _get_store() -> PinStore:
     return PinStore(base / "pins.json")
 
 
+def _format_entry(entry) -> str:
+    """Format a pin entry for display."""
+    note_part = f"  ({entry.note})" if entry.note else ""
+    return f"{entry.profile_name} -> {entry.snapshot_id}{note_part}"
+
+
 @click.group("pin")
 def cli():
     """Manage profile snapshot pins."""
@@ -53,8 +59,7 @@ def show_command(profile: str):
     if entry is None:
         click.echo(f"Profile '{profile}' is not pinned.")
     else:
-        note_part = f"  note: {entry.note}" if entry.note else ""
-        click.echo(f"{entry.profile_name} -> {entry.snapshot_id}{note_part}")
+        click.echo(_format_entry(entry))
 
 
 @cli.command("list")
@@ -66,5 +71,4 @@ def list_command():
         click.echo("No profiles are currently pinned.")
         return
     for entry in pins:
-        note_part = f"  ({entry.note})" if entry.note else ""
-        click.echo(f"{entry.profile_name} -> {entry.snapshot_id}{note_part}")
+        click.echo(_format_entry(entry))
