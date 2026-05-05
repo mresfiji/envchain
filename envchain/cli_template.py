@@ -64,6 +64,16 @@ def render_command(profiles: tuple, store: str, fmt: str, env: bool) -> None:
         click.echo(f"Template error: {exc}", err=True)
         sys.exit(1)
 
+    _output_rendered(rendered, fmt)
+
+
+def _output_rendered(rendered: dict, fmt: str) -> None:
+    """Write rendered variables to stdout in the requested format.
+
+    Args:
+        rendered: Mapping of variable names to their resolved values.
+        fmt: One of ``shell``, ``json``, or ``dotenv``.
+    """
     if fmt == "json":
         click.echo(json.dumps(rendered, indent=2, sort_keys=True))
     elif fmt == "dotenv":
