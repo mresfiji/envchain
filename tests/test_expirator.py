@@ -42,6 +42,12 @@ def test_expiry_entry_from_dict_roundtrip():
     assert restored.note == entry.note
 
 
+def test_expiry_entry_roundtrip_preserves_expires_at():
+    entry = _make_entry(expires_at=datetime(2077, 3, 15, 12, 30, 0, tzinfo=timezone.utc))
+    restored = ExpiryEntry.from_dict(entry.to_dict())
+    assert restored.expires_at == entry.expires_at
+
+
 def test_is_expired_past():
     entry = _make_entry(expires_at=PAST)
     assert entry.is_expired()
@@ -104,3 +110,14 @@ def test_persistence(store_path: Path):
     result = s2.get("prod", "API_KEY")
     assert result is not None
     assert result.note == "persisted"
+
+
+def test_set_overwrites_existing_entry(store: ExpiryStore):
+    """Setting an entry for the same profile/variable should update it in place."""
+    store.set(_make_entry(note="original", expires_at=FUTURE))
+    store.set(_make_entry(note="updated", expires_at=PAST))
+    result = store.get("prod", "API_KEY")
+    assert result is not None
+    assert result.note == "updated"
+    assert result.is_expired()
+    assert len(store.all_entries()) == 1
