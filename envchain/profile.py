@@ -79,3 +79,24 @@ class ProfileStore:
 
     def list_by_context(self, context: str) -> List[Profile]:
         return [p for p in self._profiles.values() if p.context == context]
+
+    def update_vars(self, name: str, vars: Dict[str, str], merge: bool = True) -> Profile:
+        """Update environment variables for an existing profile.
+
+        Args:
+            name: The profile name to update.
+            vars: A dict of variables to set on the profile.
+            merge: If True, merge with existing vars; if False, replace them entirely.
+
+        Returns:
+            The updated Profile.
+
+        Raises:
+            KeyError: If no profile with the given name exists.
+        """
+        profile = self._profiles.get(name)
+        if profile is None:
+            raise KeyError(f"Profile '{name}' not found.")
+        profile.vars = {**profile.vars, **vars} if merge else vars
+        self._save()
+        return profile
