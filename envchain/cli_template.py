@@ -64,6 +64,10 @@ def render_command(profiles: tuple, store: str, fmt: str, env: bool) -> None:
         click.echo(f"Template error: {exc}", err=True)
         sys.exit(1)
 
+    if not rendered:
+        click.echo("Warning: no variables found in the resolved profiles.", err=True)
+        return
+
     _output_rendered(rendered, fmt)
 
 
