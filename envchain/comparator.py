@@ -72,3 +72,27 @@ def format_compare(result: CompareResult, mask_values: bool = True) -> List[str]
         lines.append(f"  {key}=(unchanged)")
 
     return lines
+
+
+def compare_dicts(left_name: str, right_name: str, left: Dict[str, str], right: Dict[str, str]) -> CompareResult:
+    """Compare two plain variable dicts and return a CompareResult.
+
+    Useful for comparing snapshots or arbitrary environment mappings without
+    requiring full Profile objects.
+    """
+    result = CompareResult(left_name=left_name, right_name=right_name)
+    all_keys = set(left) | set(right)
+
+    for key in sorted(all_keys):
+        in_left = key in left
+        in_right = key in right
+        if in_left and not in_right:
+            result.only_in_left[key] = left[key]
+        elif in_right and not in_left:
+            result.only_in_right[key] = right[key]
+        elif left[key] != right[key]:
+            result.changed[key] = (left[key], right[key])
+        else:
+            result.unchanged[key] = left[key]
+
+    return result
