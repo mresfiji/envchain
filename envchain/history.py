@@ -48,11 +48,21 @@ class HistoryStore:
         self._path = path
         self._entries: list[HistoryEntry] = []
         if path.exists():
-            raw = json.loads(path.read_text())
-            self._entries = [HistoryEntry.from_dict(e) for e in raw]
+            try:
+                raw = json.loads(path.read_text())
+                self._entries = [HistoryEntry.from_dict(e) for e in raw]
+            except (json.JSONDecodeError, KeyError) as exc:
+                raise HistoryError(
+                    f"Failed to load history from {path}: {exc}"
+                ) from exc
 
     def _save(self) -> None:
-        self._path.write_text(json.dumps([e.to_dict() for e in self._entries], indent=2))
+        try:
+            self._path.write_text(
+                json.dumps([e.to_dict() for e in self._entries], indent=2)
+            )
+        except OSError as exc:
+            raise HistoryError(f"Failed to save history to {self._path}: {exc}") from exc
 
     def record(self, entry: HistoryEntry) -> None:
         self._entries.append(entry)
