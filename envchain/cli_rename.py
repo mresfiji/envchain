@@ -56,6 +56,9 @@ def rename_command(
     """Rename OLD_NAME to NEW_NAME within the given context."""
     from pathlib import Path
 
+    if old_name == new_name:
+        raise click.UsageError("OLD_NAME and NEW_NAME must be different.")
+
     profile_store = ProfileStore(Path(store_path))
 
     history_store = None
